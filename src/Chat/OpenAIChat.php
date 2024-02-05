@@ -24,6 +24,18 @@ class OpenAIChat
 
     public string $model;
 
+    public ?float $temperature = null;
+
+    public ?int $maxToken = null;
+
+    public ?float $topP = null;
+
+    public ?float $presencePenalty = null;
+
+    public ?float $frequencyPenalty = null;
+
+    public ?string $stop = null;
+
     private Message $systemMessage;
 
     /** @var FunctionInfo[] */
@@ -46,6 +58,12 @@ class OpenAIChat
             $this->client = OpenAI::client($apiKey);
         }
         $this->model = $config->model ?? OpenAIChatModel::Gpt4Turbo->getModelName();
+        $this->temperature = $config->temperature ?? 0;
+        $this->maxToken = $config->maxToken ?? 500;
+        $this->topP = $config->topP ?? 1;
+        $this->presencePenalty = $config->presencePenalty ?? 0;
+        $this->frequencyPenalty = $config->frequencyPenalty ?? 0;
+        $this->stop = $config->stop ?? null;
     }
 
     public function generateText(string $prompt): string
@@ -144,6 +162,7 @@ class OpenAIChat
     {
         $messages = $this->createOpenAIMessagesFromPrompt($prompt);
         $openAiArgs = $this->getOpenAiArgs($messages);
+        dd($openAiArgs);
 
         return $this->client->chat()->create($openAiArgs);
     }
@@ -229,6 +248,12 @@ class OpenAIChat
         $openAiArgs = [
             'model' => $this->model,
             'messages' => $finalMessages,
+            'temperature' => $this->temperature,
+            'max_tokens' => $this->maxToken,
+            'top_p' => $this->topP,
+            'presence_penalty' => $this->presencePenalty,
+            'frequency_penalty' => $this->frequencyPenalty,
+            'stop' => $this->stop,
         ];
 
         if ($this->tools !== []) {
